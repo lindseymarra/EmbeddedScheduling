@@ -1,34 +1,48 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sched.h>
 
+
+pthread_mutex_t mutex;
+pthread_mutexattr_t mutex_attr; //TODO:USE 
+pthread_t thread_1; 
+struct sched_param param; //TODO:USE 
+int priority = 10; // why am I defining this as 10 initially before setting it equal to sched_get_priority_max(policy)?
+int policy = SCHED_RR; //assigns round robin to declared policy variable
 
 void *handler_1()
 {
+    pthread_mutex_lock(&mutex); //locks while in use
     sleep(1);
     printf("thread 1 used shared resource \n");
+    pthread_mutex_unlock(&mutex); //unlocked when done
     return NULL;
 }
 
 void main()
 {
-    pthread_mutex_t mutex;
-    //pthread_mutexattr_t attr; //TODO:USE 
-    pthread_t thread_1; 
-    //struct sched_param param; //TODO:USE 
     
-    
-    //create mutex and initialize it
-    pthread_mutex_init(&mutex, NULL);
+    //create mutex, set protocol, and initialize it
+    pthread_mutexattr_setprotocol(&mutex_attr, PTHREAD_PRIO_INHERIT);
+    pthread_mutex_init(&mutex, &mutex_attr);
 
-    //set different priority for threads 1, 2, and 3
+    //set & get different priority for threads 1, 2, and 3
+    printf("%d \n",priority);
+    priority=sched_get_priority_max(policy);
+    printf("%d \n",priority);
+    param.sched_priority = priority;
 
-    //set handler for threads 1, 2, 3
+
+
+    //set create threads 1, 2, 3
     printf("before thread \n");
-    pthread_mutex_lock(&mutex);
+
     pthread_create(&thread_1, NULL, handler_1, NULL);
+    pthread_setschedparam(thread_1,policy,&param); //I moved this from before pthread_create to after and it didn't make a difference that I can currently see
     pthread_join(thread_1, NULL);
-    pthread_mutex_unlock(&mutex); //should unlock be before or after join?
+
     sleep(1);
     printf("after thread\n");
 
