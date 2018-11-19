@@ -43,6 +43,7 @@ void main()
     
     for(t=0; t<=100; t++) // the scheduler is run once every time slice to choose which is the next process to run
     {
+        
         if(t==nextA)
         {
             printf("task %c%d released at time %d\n", 'A', taskA, t);
@@ -55,7 +56,7 @@ void main()
         }
             
 
-        }
+        
         if(t==0) // skip checking if the running task is complete since neither have started yet
         {
             // calculate and then compare deadlines 
@@ -117,7 +118,7 @@ void main()
                 deadlineA = calculate_deadline((t+executionA), periodA);
             }
 
-
+        }
 
     }
 
